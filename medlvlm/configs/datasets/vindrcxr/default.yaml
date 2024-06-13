@@ -1,0 +1,6 @@
+datasets:
+  vindrcxr:
+    data_type: images
+    build_info:
+      image_path: /path/to/images
+      ann_path: /path/to/grounded_diseases.json
