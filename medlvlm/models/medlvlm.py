@@ -63,7 +63,7 @@ class MedLVLM(MedLVLMBase):
         )
 
         img_f_dim = self.visual_encoder.num_features * 4
-        self.llama_proj = nn.Linear(
+        self.language_proj = nn.Linear(
             img_f_dim, self.language_model.config.hidden_size
         )
         self.chat_template = chat_template
@@ -83,9 +83,9 @@ class MedLVLM(MedLVLMBase):
             bs, pn, hs = image_embeds.shape
             image_embeds = image_embeds.view(bs, int(pn / 4), int(hs * 4))
 
-            inputs_llama = self.llama_proj(image_embeds)
-            atts_llama = torch.ones(inputs_llama.size()[:-1], dtype=torch.long).to(image.device)
-        return inputs_llama, atts_llama
+            inputs_language = self.language_proj(image_embeds)
+            atts_language = torch.ones(inputs_language.size()[:-1], dtype=torch.long).to(image.device)
+        return inputs_language, atts_language
 
     @classmethod
     def from_config(cls, cfg):
@@ -103,6 +103,7 @@ class MedLVLM(MedLVLMBase):
         max_txt_len = cfg.get("max_txt_len", 300)
         end_sym = cfg.get("end_sym", '\n')
 
+        bits = cfg.get("bits", 8)
         lora_r = cfg.get("lora_r", 64)
         lora_alpha = cfg.get("lora_alpha", 16)
         chat_template = cfg.get("chat_template", False)
@@ -124,6 +125,7 @@ class MedLVLM(MedLVLMBase):
             end_sym=end_sym,
             lora_r=lora_r,
             lora_alpha=lora_alpha,
+            bits=bits,
             chat_template=chat_template,
             use_grad_checkpoint_llm=use_grad_checkpoint_llm,
             max_context_len=max_context_len,

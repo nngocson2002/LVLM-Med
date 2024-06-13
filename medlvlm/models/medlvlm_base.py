@@ -32,6 +32,7 @@ class MedLVLMBase(BaseModel):
         low_resource=False,  # use 8 bit and put vit in cpu
         device_8bit=0,  # the device of 8bit model should be set when loading and cannot be changed anymore.
         lora_r=0,  # lora_r means lora is not used
+        bits=8,
         lora_target_modules=["q_proj", "v_proj"],
         lora_alpha=16,
         lora_dropout=0.05,
@@ -40,6 +41,7 @@ class MedLVLMBase(BaseModel):
 
         self.language_model, self.language_tokenizer = self.init_llm(
             language_model_path=language_model,
+            bits=bits,
             low_resource=low_resource,
             low_res_device=device_8bit,
             lora_r=lora_r,

@@ -11,6 +11,7 @@ model:
   low_resource: True
   lora_r: 64
   lora_alpha: 16
+  bits: 8
 
 datasets:
   vindrcxr:
