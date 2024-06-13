@@ -8,6 +8,6 @@ class PubmedCLIPViT(nn.Module):
         self.num_features = 768
 
     def forward(self, x):
-        h, w = x.shape[2,:]
+        h, w = x.shape[2:]
         assert h == 224 and w == 224, "The resolution of the image must be (224, 224)"
         return self.model(x).last_hidden_state

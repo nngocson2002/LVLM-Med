@@ -32,6 +32,7 @@ class MedLVLM(MedLVLMBase):
             prompt_template='[INST] {} [/INST]',
             max_txt_len=300,
             end_sym='\n',
+            bits=8,
             lora_r=64,
             lora_target_modules=["q_proj", "v_proj"],
             lora_alpha=16,
@@ -56,13 +57,14 @@ class MedLVLM(MedLVLMBase):
             prompt_template=prompt_template,
             low_resource=low_resource,
             device_8bit=device_8bit,
+            bits=bits,
             lora_r=lora_r,
             lora_target_modules=lora_target_modules,
             lora_alpha=lora_alpha,
             lora_dropout=lora_dropout,
         )
 
-        img_f_dim = self.visual_encoder.num_features * 4
+        img_f_dim = self.visual_encoder.num_features * self.num_concat
         self.language_proj = nn.Linear(
             img_f_dim, self.language_model.config.hidden_size
         )
@@ -81,7 +83,7 @@ class MedLVLM(MedLVLMBase):
             image_embeds = self.ln_vision(self.visual_encoder(image)).to(device)
             image_embeds = image_embeds[:, 1:, :]
             bs, pn, hs = image_embeds.shape
-            image_embeds = image_embeds.view(bs, int(pn / 4), int(hs * 4))
+            image_embeds = image_embeds.view(bs, int(pn / self.num_concat), int(hs * self.num_concat))
 
             inputs_language = self.language_proj(image_embeds)
             atts_language = torch.ones(inputs_language.size()[:-1], dtype=torch.long).to(image.device)

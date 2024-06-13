@@ -150,7 +150,7 @@ class BaseModel(nn.Module):
             if precision is not None:
                 kwargs["precision"] = "fp32"  # fp16 is not for training
 
-        visual_encoder = build_vision_encoder(model_name, **kwargs)
+        visual_encoder, num_concat = build_vision_encoder(model_name, **kwargs)
 
         ln_vision = LayerNorm(visual_encoder.num_features)
 
@@ -166,7 +166,7 @@ class BaseModel(nn.Module):
             logging.info("freeze vision encoder")
 
         logging.info(f'Loading {model_name} Done')
-        return visual_encoder, ln_vision
+        return visual_encoder, ln_vision, num_concat
 
     def init_llm(cls, language_model_path, bits=8, low_resource=False, low_res_device=0, lora_r=0,
                  lora_target_modules=["q_proj","v_proj"], **lora_kargs):

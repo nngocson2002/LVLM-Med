@@ -50,7 +50,7 @@ class MedLVLMBase(BaseModel):
             lora_dropout=lora_dropout,
         )
 
-        self.visual_encoder, self.ln_vision = self.init_vision_encoder(
+        self.visual_encoder, self.ln_vision, self.num_concat = self.init_vision_encoder(
             vision_model,
             freeze_vision, 
             img_size=img_size, 
