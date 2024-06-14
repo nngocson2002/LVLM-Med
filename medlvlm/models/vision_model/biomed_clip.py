@@ -4,7 +4,7 @@ import torch.nn as nn
 class BiomedCLIP(nn.Module):
     def __init__(self):
         super(BiomedCLIP, self).__init__()
-        self.model, _ = create_model_from_pretrained("hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224").visual.trunk
+        self.model = create_model_from_pretrained("hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224", return_transform=False).visual.trunk
         self.num_features = 768
 
     def forward(self, x):
