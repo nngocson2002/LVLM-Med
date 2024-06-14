@@ -145,7 +145,7 @@ class BaseModel(nn.Module):
     ):
         logging.info(f'Loading {model_name}')
 
-        precision = kwargs.get('precision', None)
+        precision = kwargs.get('precision', "fp16")
         if not freeze:
             if precision is not None:
                 kwargs["precision"] = "fp32"  # fp16 is not for training
@@ -176,25 +176,25 @@ class BaseModel(nn.Module):
         tokenizer = AutoTokenizer.from_pretrained(language_model_path, use_fast=False)
         tokenizer.pad_token = "$$"
 
-        model_args = {
-            "pretrained_model_name_or_path": language_model_path,
-            "torch_dtype": torch.float16
-        }
-
-        if low_resource and bits in [4, 8]:
+        if low_resource:
+            model_args = {}
             from transformers import BitsAndBytesConfig
-            bnb_config = BitsAndBytesConfig(
-                load_in_8bit=bits == 8,
-                load_in_4bit=bits == 4,
-                bnb_4bit_compute_dtype=torch.float16,
-                bnb_4bit_use_double_quant=True,
-                bnb_4bit_quant_type="nf4"
-            )
-
-            model_args.update({
-                "quantization_config": bnb_config,
-                "device_map": {'': low_res_device}
-            })
+            model_args.update(dict(
+                pretrained_model_name_or_path=language_model_path,
+                device_map={"": low_res_device},
+                quantization_config=BitsAndBytesConfig(
+                    load_in_4bit= bits == 4,
+                    load_in_8bit= bits == 8,
+                    llm_int8_has_fp16_weight=True,
+                    bnb_4bit_use_double_quant=True,
+                    bnb_4bit_quant_type="nf4"
+                )
+            ))
+        else:
+            model_args = {
+                "pretrained_model_name_or_path": language_model_path,
+                "torch_dtype": torch.float16
+            }
 
         if "llama" in language_model_path.lower():
             from medlvlm.models.language_model.modeling_llama import LlamaForCausalLM

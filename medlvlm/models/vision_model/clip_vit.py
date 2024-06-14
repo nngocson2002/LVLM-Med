@@ -11,3 +11,10 @@ class PubmedCLIPViT(nn.Module):
         h, w = x.shape[2:]
         assert h == 224 and w == 224, "The resolution of the image must be (224, 224)"
         return self.model(x).last_hidden_state
+    
+def create_pubmed_clip_vit(**kwargs):
+    precision = kwargs.get("precision", "fp16")
+    model = PubmedCLIPViT()
+    if precision == "fp16":
+        model = model.half()
+    return model
