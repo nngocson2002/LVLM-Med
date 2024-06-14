@@ -10,10 +10,8 @@ import logging
 import contextlib
 
 from omegaconf import OmegaConf
-import numpy as np
 import torch
 import torch.nn as nn
-from transformers import LlamaTokenizer
 from peft import (
     LoraConfig,
     get_peft_model,
@@ -24,7 +22,7 @@ from medlvlm.common.dist_utils import download_cached_file
 from medlvlm.common.utils import get_abs_path, is_url
 from .vision_model.builder import build_vision_encoder
 
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoTokenizer
 
 
 
@@ -199,8 +197,10 @@ class BaseModel(nn.Module):
         if "llama" in language_model_path.lower():
             from medlvlm.models.language_model.modeling_llama import LlamaForCausalLM
             model = LlamaForCausalLM.from_pretrained(**model_args)
+        elif "mistral" in language_model_path.lower():
+            from medlvlm.models.language_model.modeling_mistral import MistralForCausalLM
+            model = MistralForCausalLM.from_pretrained(**model_args)
         else:
-            # another language model
             pass
 
         if lora_r > 0:
