@@ -20,9 +20,10 @@ from medlvlm.datasets.datasets.ocrvqa_dataset import OCRVQADataset
 from medlvlm.datasets.datasets.coco_caption import COCOCapDataset
 from medlvlm.datasets.datasets.vindrcxr_dataset import VinDrCXRDataset
 
-@registry.register_builder("vindrcxr")
+@registry.register_builder("vindrcxr_train")
 class VinDrCXRBuilder(BaseDatasetBuilder):
     train_dataset_cls = VinDrCXRDataset
+    eval_dataset_cls = VinDrCXRDataset
     DATASET_CONFIG_DICT = {
         "default": "configs/datasets/vindrcxr/default.yaml",
     }
@@ -36,11 +37,36 @@ class VinDrCXRBuilder(BaseDatasetBuilder):
 
         # create datasets
         dataset_cls = self.train_dataset_cls
-        datasets['train'] = dataset_cls(
+        datasets["train"] = dataset_cls(
             vis_processor=self.vis_processors["train"],
             text_processor=self.text_processors["train"],
-            ann_path=build_info.ann_path,
-            vis_root=build_info.image_path,
+            ann_path=build_info.train.ann_path,
+            vis_root=build_info.train.image_path,
+        )
+
+        return datasets
+    
+@registry.register_builder("vindrcxr_val")
+class VinDrCXRBuilder(BaseDatasetBuilder):
+    eval_dataset_cls = VinDrCXRDataset
+    DATASET_CONFIG_DICT = {
+        "default": "configs/datasets/vindrcxr/default.yaml",
+    }
+
+    def build_datasets(self):
+        # at this point, all the annotations and image/videos should be all downloaded to the specified locations.
+        logging.info("Building datasets...")
+        self.build_processors()
+        build_info = self.config.build_info
+        datasets = dict()
+
+        # create datasets
+        dataset_cls = self.eval_dataset_cls
+        datasets["val"] = dataset_cls(
+            vis_processor=self.vis_processors["eval"],
+            text_processor=self.text_processors["eval"],
+            ann_path=build_info.val.ann_path,
+            vis_root=build_info.val.image_path,
         )
 
         return datasets

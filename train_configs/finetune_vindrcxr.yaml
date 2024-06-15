@@ -4,7 +4,7 @@ model:
   max_txt_len: 1024
   image_size: 448
   end_sym: "</s>"
-  llama_model: "meta-llama/Llama-2-7b-chat-hf"
+  language_model: "meta-llama/Llama-2-7b-chat-hf"
   ckpt: "/path/to/pretrained_checkpoint"
   use_grad_checkpoint: True
   chat_template: True
@@ -14,7 +14,7 @@ model:
   bits: 8
 
 datasets:
-  vindrcxr:
+  vindrcxr_train:
     batch_size: 4
     vis_processor:
       train:
@@ -24,7 +24,7 @@ datasets:
       train:
         name: "blip_caption"
     sample_ratio: 10
- 
+
 run:
   task: image_text_pretrain
   # optimizer
@@ -54,4 +54,4 @@ run:
   distributed: False
 
   wandb_log: True
-  job_name: minigptv2_finetune_vindrcxr
+  job_name: medlvlm_finetune_vindrcxr
