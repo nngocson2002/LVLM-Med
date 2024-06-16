@@ -2,39 +2,29 @@ import argparse
 import json
 from medlvlm.datasets.datasets.vindrcxr_dataset import VinDrCXRDataset
 from torch.utils.data import DataLoader
-from collections import defaultdict
 from tqdm import tqdm
 import torch
+import os
 from medlvlm.common.eval_utils import prepare_texts
 from medlvlm.common.registry import registry
 from medlvlm.common.config import Config
 from medlvlm.conversation.conversation import Conversation, SeparatorStyle
 
-def list_of_str(arg):
-    return list(map(str, arg.split(',')))
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="Evaluating")
-    parser.add_argument("--cfg-path", required=True, help="path to configuration file.")
-    parser.add_argument("--dataset", type=list_of_str, default='refcoco', help="dataset to evaluate")
-    parser.add_argument(
-        "--options",
-        nargs="+",
-        help="override some settings in the used config, the key-value pair "
-             "in xxx=yyy format will be merged into config file (deprecate), "
-             "change to --cfg-options instead.",
-    )
-    args = parser.parse_args()
-
-    return args
+CONV_VISION = Conversation(
+    system="",
+    roles=(r"<s>[INST] ", r" [/INST]"),
+    messages=[],
+    offset=2,
+    sep_style=SeparatorStyle.SINGLE,
+    sep="",
+)
 
 def init_model(cfg):
     print('Initialization Model')
-    cfg = Config(cfg)
     # cfg.model_cfg.ckpt = args.ckpt
     # cfg.model_cfg.lora_r = args.lora_r
     # cfg.model_cfg.lora_alpha = args.lora_alpha
-
+    cfg = Config(cfg)
     model_config = cfg.model_cfg
     model_cls = registry.get_model_class(model_config.arch)
     model = model_cls.from_config(model_config).to('cuda:0')
@@ -48,46 +38,44 @@ def init_model(cfg):
     print('Initialization Finished')
     return model, vis_processor, text_processor
 
-args = parse_args()
-cfg = Config(args)
-model, vis_processor, text_processor = init_model(args)
-model.eval()
+def evaluate(args):
+    cfg = Config(args)
+    model, vis_processor, text_processor = init_model(cfg)
+    model.eval()
 
-CONV_VISION = Conversation(
-    system="",
-    roles=(r"<s>[INST] ", r" [/INST]"),
-    messages=[],
-    offset=2,
-    sep_style=SeparatorStyle.SINGLE,
-    sep="",
-)
+    conv_temp = CONV_VISION.copy()
 
-conv_temp = CONV_VISION.copy()
+    for dataset in args.eval_dataset:
+        eval_file_path = cfg.evaluation_datasets_cfg[dataset]["eval_file_path"]
+        img_path = cfg.evaluation_datasets_cfg[dataset]["img_path"]
+        batch_size = cfg.evaluation_datasets_cfg[dataset]["batch_size"]
+        max_new_tokens = cfg.evaluation_datasets_cfg[dataset]["max_new_tokens"]
+        temperature = cfg.evaluation_datasets_cfg[dataset]["temperature"]
+        top_p = cfg.evaluation_datasets_cfg[dataset]["top_p"]
+        do_sample = cfg.evaluation_datasets_cfg[dataset]["do_sample"]
 
-for dataset in args.dataset:
-    eval_file_path = cfg.evaluation_datasets_cfg[dataset]["eval_file_path"]
-    img_path = cfg.evaluation_datasets_cfg[dataset]["img_path"]
-    batch_size = cfg.evaluation_datasets_cfg[dataset]["batch_size"]
-    max_new_tokens = cfg.evaluation_datasets_cfg[dataset]["max_new_tokens"]
+        data = VinDrCXRDataset(
+            vis_processor=vis_processor,
+            text_processor=text_processor,
+            ann_path=eval_file_path,
+            vis_root=img_path
+        )
 
-    with open(eval_file_path, "r") as f:
-        vindrcxr = json.load(f)
-
-    data = VinDrCXRDataset(
-        vis_processor=vis_processor,
-        text_processor=text_processor,
-        ann_path=eval_file_path,
-        vis_root=img_path
-    )
-
-    eval_dataloader = DataLoader(data, batch_size=batch_size, shuffle=False)
-    predict = defaultdict(list)
-
-    for batch in eval_dataloader:
-        image = batch["image"].half()
-        instruction_input = batch["instruction_input"]
-        answer = batch["answer"]
-        image_id = batch["image_id"]
-        texts = prepare_texts(instruction_input, conv_temp)
-        answers = model.generate(images=image, texts=instruction_input, max_new_tokens=max_new_tokens, do_sample=False)
-        break
+        eval_dataloader = DataLoader(data, batch_size=batch_size, shuffle=False)
+        results = []
+        for batch in tqdm(eval_dataloader):
+            images = batch["image"].half()
+            instruction_input = batch["instruction_input"]
+            ground_truth = batch["answer"]
+            image_ids = batch["image_id"]
+            texts = prepare_texts(instruction_input, conv_temp)
+            predicts = model.generate(images=images,
+                                    texts=instruction_input,
+                                    max_new_tokens=max_new_tokens,
+                                    temperature=temperature,
+                                    top_p=top_p,
+                                    do_sample=do_sample)
+            results.extend([{"image_id": image_id, "ground_truth": gt, "predict": predict} for image_id, gt, predict in zip(image_ids, ground_truth, predicts)])
+        
+    with open(os.path.join(cfg.run_cfg.eval_save_path, "outputs_test.json"),"w") as jsonfile:
+        json.dump(results, jsonfile, ensure_ascii=False)

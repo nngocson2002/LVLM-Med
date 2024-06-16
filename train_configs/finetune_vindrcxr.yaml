@@ -2,8 +2,9 @@ model:
   arch: medlvlm
   model_type: pretrain
   max_txt_len: 1024
-  image_size: 448
+  image_size: 224
   end_sym: "</s>"
+  vision_model: "biomed_clip"
   language_model: "meta-llama/Llama-2-7b-chat-hf"
   ckpt: "/path/to/pretrained_checkpoint"
   use_grad_checkpoint: True
@@ -19,7 +20,7 @@ datasets:
     vis_processor:
       train:
         name: "blip2_image_train"
-        image_size: 448
+        image_size: 224
     text_processor:
       train:
         name: "blip_caption"
@@ -54,4 +55,5 @@ run:
   distributed: False
 
   wandb_log: True
+  wandb_token: "37fb092f7fa68e2ae0c78a37451b3479c1667e8c"
   job_name: medlvlm_finetune_vindrcxr

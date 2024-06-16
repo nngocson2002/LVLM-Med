@@ -2,5 +2,5 @@ datasets:
   vindrcxr_train:
     data_type: images
     build_info:
-      image_path: /home/nngocson/FPT/images/test
-      ann_path: /home/nngocson/FPT/grounded_diseases_test_2.json
+      image_path: /path/to/images/train
+      ann_path: /path/to/annotations/train
