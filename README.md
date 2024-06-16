@@ -42,14 +42,14 @@ pip install -r requirements.txt
     - Set the checkpoint save path [here](train_configs/biomedclip_llama.yaml#L44) at Line 44.
 
 2. **Set Paths for Evaluation (After Training)**
-    - Set the evaluation annotations path to `root/annotations/test/grounded_diseases_test.json` [here](eval_configs/eval_biomedclip.yaml#L27) at Line 27.
-    - Set the evaluation image path to `root/images/test` [here](eval_configs/eval_biomedclip.yaml#L28) at Line 28.
-    - Set the evaluation result output path [here](eval_configs/eval_biomedclip.yaml#L38) at Line 38.
+    - Set the evaluation annotations path to `root/annotations/test/grounded_diseases_test.json` [here](eval_configs/eval_biomedclip_llama.yaml#L27) at Line 27.
+    - Set the evaluation image path to `root/images/test` [here](eval_configs/eval_biomedclip_llama.yaml#L28) at Line 28.
+    - Set the evaluation result output path [here](eval_configs/eval_biomedclip_llama.yaml#L38) at Line 38.
 
 3. **Run**
 ```bash
 torchrun --nproc-per-node NUM_GPU train.py\ 
          --cfg-path train_configs/biomedclip_llama.yaml\
-         --cfg-eval-path eval_configs/eval_vindrcxr.yaml\
+         --cfg-eval-path eval_configs/eval_biomedclip_llama.yaml\
          --eval-dataset vindrcxr_val
 ```
