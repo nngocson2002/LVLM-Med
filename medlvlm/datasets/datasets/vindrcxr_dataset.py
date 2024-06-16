@@ -6,7 +6,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 class VinDrCXRDataset(Dataset):
-    def __init__(self, vis_processor, text_processor, vis_root, ann_path):
+    def __init__(self, vis_processor, text_processor, vis_root, ann_path, prompt_test=None):
         """
         vis_root (string): Root directory of images (e.g. coco/images/)
         ann_root (string): directory to store the annotation file
@@ -16,14 +16,17 @@ class VinDrCXRDataset(Dataset):
         self.vis_processor = vis_processor
         self.text_processor = text_processor
 
-        self.instruction_pool = [
-            "[radiology] please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes.",
-            "[radiology] please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes. Let's think step by step.",
-            "[radiology] This is a radiological image of a chest x-ray from a Posterior Anterior view. Examine all the areas where the lung borders the diaphragm, the heart and other mediastinal structures. Please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes.",
-            "[radiology] This is a radiological image of a chest x-ray from a Posterior Anterior view. Examine all the areas where the lung borders the diaphragm, the heart and other mediastinal structures. Please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes. Let's think step by step.",
-            "[radiology] Please describe this image in details with radiological features. Use one sentence unless there are no findings. The sentence should list the global diseases present in the image."
-            "[radiology] This is a radiological image of a chest x-ray from a Posterior Anterior view. Examine all the areas where the lung borders  the diaphragm, the heart and other mediastinal structures. Please describe this image in details with radiological features. Use one sentence unless there are no findings. The sentence should list the  global diseases present in the image."
-        ]
+        if prompt_test is not None:
+            self.instruction_pool = [
+                "[radiology] please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes.",
+                "[radiology] please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes. Let's think step by step.",
+                "[radiology] This is a radiological image of a chest x-ray from a Posterior Anterior view. Examine all the areas where the lung borders the diaphragm, the heart and other mediastinal structures. Please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes.",
+                "[radiology] This is a radiological image of a chest x-ray from a Posterior Anterior view. Examine all the areas where the lung borders the diaphragm, the heart and other mediastinal structures. Please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes. Let's think step by step.",
+                "[radiology] Please describe this image in details with radiological features. Use one sentence unless there are no findings. The sentence should list the global diseases present in the image."
+                "[radiology] This is a radiological image of a chest x-ray from a Posterior Anterior view. Examine all the areas where the lung borders  the diaphragm, the heart and other mediastinal structures. Please describe this image in details with radiological features. Use one sentence unless there are no findings. The sentence should list the  global diseases present in the image."
+            ]
+        else:
+            self.instruction_pool = [prompt_test]
 
         with open(ann_path, 'r') as f:
             self.ann = json.load(f)

@@ -48,6 +48,7 @@ def evaluate(args):
     for dataset in args.eval_dataset:
         eval_file_path = cfg.evaluation_datasets_cfg[dataset]["eval_file_path"]
         img_path = cfg.evaluation_datasets_cfg[dataset]["img_path"]
+        prompt_test = cfg.evaluation_datasets_cfg[dataset]["prompt_test"]
         batch_size = cfg.evaluation_datasets_cfg[dataset]["batch_size"]
         max_new_tokens = cfg.evaluation_datasets_cfg[dataset]["max_new_tokens"]
         temperature = cfg.evaluation_datasets_cfg[dataset]["temperature"]
@@ -58,7 +59,8 @@ def evaluate(args):
             vis_processor=vis_processor,
             text_processor=text_processor,
             ann_path=eval_file_path,
-            vis_root=img_path
+            vis_root=img_path,
+            prompt_test=prompt_test
         )
 
         eval_dataloader = DataLoader(data, batch_size=batch_size, shuffle=False)
