@@ -113,7 +113,7 @@ def main():
 
         with open(args.cfg_path) as f:
             eval_cfg = yaml.load(f, Loader=yaml.FullLoader)
-            eval_cfg["ckpt"] = last_ckpt_path
+            eval_cfg["model"]["ckpt"] = last_ckpt_path
 
         with open(args.cfg_path, "w") as f:
             yaml.dump(

@@ -24,7 +24,6 @@ def init_model(cfg):
     # cfg.model_cfg.ckpt = args.ckpt
     # cfg.model_cfg.lora_r = args.lora_r
     # cfg.model_cfg.lora_alpha = args.lora_alpha
-    cfg = Config(cfg)
     model_config = cfg.model_cfg
     model_cls = registry.get_model_class(model_config.arch)
     model = model_cls.from_config(model_config).to('cuda:0')
