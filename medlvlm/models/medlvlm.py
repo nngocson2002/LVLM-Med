@@ -1,5 +1,6 @@
 import logging
 import random
+import os
 
 import torch
 from torch.cuda.amp import autocast as autocast
@@ -9,7 +10,7 @@ from medlvlm.common.registry import registry
 from medlvlm.models.base_model import disabled_train
 from medlvlm.models.medlvlm_base import MedLVLMBase
 
-IMG_DIM_VIT_LLAMA = 1408
+IMG_DIM_VIT_LLAMA = 5632 # 1408 * 4
 
 @registry.register_model("medlvlm")
 class MedLVLM(MedLVLMBase):
@@ -148,8 +149,8 @@ class MedLVLM(MedLVLMBase):
             ckpt = torch.load(ckpt_path, map_location="cpu")
             msg = model.load_state_dict(ckpt['model'], strict=False)
 
-            if not (vision_model == "eva_clip_g" and "llama" in language_model):
-                model.language_proj[-1].weight.data = ckpt['model']['language_proj'].weight.data
-                model.language_proj[-1].bias.data = ckpt['model']['language_proj'].bias.data
+            if os.path.basename(ckpt_path) == "checkpoint_stage3.pth":
+                model.language_proj[-1].weight.data = ckpt['model']['llama_proj.weight']
+                model.language_proj[-1].bias.data = ckpt['model']['llama_proj.bias']
 
         return model
