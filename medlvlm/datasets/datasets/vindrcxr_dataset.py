@@ -16,7 +16,7 @@ class VinDrCXRDataset(Dataset):
         self.vis_processor = vis_processor
         self.text_processor = text_processor
 
-        if prompt_test is not None:
+        if prompt_test is None:
             self.instruction_pool = [
                 "[radiology] please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes.",
                 "[radiology] please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes. Let's think step by step.",
