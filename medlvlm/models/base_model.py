@@ -184,7 +184,7 @@ class BaseModel(nn.Module):
                     load_in_4bit= bits == 4,
                     load_in_8bit= bits == 8,
                     llm_int8_has_fp16_weight=True,
-                    bnb_4bit_compute_dtype=torch.bfloat16,
+                    bnb_4bit_compute_dtype=torch.float16,
                     bnb_4bit_use_double_quant=True,
                     bnb_4bit_quant_type="nf4"
                 )
@@ -214,6 +214,13 @@ class BaseModel(nn.Module):
                 **lora_kargs
             )
             model = get_peft_model(model, loraconfig)
+            for name, module in model.named_modules():
+                if 'norm' in name:
+                    module = module.to(torch.float16)
+
+                if 'lm_head' in name or 'embed_tokens' in name:
+                    if hasattr(module, 'weight'):
+                        module = module.to(torch.float16)
 
             model.print_trainable_parameters()
 
