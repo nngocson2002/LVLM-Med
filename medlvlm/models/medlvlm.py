@@ -9,6 +9,7 @@ from medlvlm.common.registry import registry
 from medlvlm.models.base_model import disabled_train
 from medlvlm.models.medlvlm_base import MedLVLMBase
 
+IMG_DIM_VIT_LLAMA = 1408
 
 @registry.register_model("medlvlm")
 class MedLVLM(MedLVLMBase):
@@ -65,9 +66,17 @@ class MedLVLM(MedLVLMBase):
         )
 
         img_f_dim = self.visual_encoder.num_features * self.num_concat
-        self.language_proj = nn.Linear(
-            img_f_dim, self.language_model.config.hidden_size
-        )
+        if vision_model == "eva_clip_g" and "llama" in language_model: 
+            self.language_proj = nn.Linear(
+                img_f_dim, self.language_model.config.hidden_size
+            )
+        else:
+            self.language_proj = nn.Sequential(
+                nn.Linear(img_f_dim, IMG_DIM_VIT_LLAMA),
+                nn.GELU(),
+                nn.Linear(IMG_DIM_VIT_LLAMA, self.language_model.config.hidden_size)
+            )
+
         self.chat_template = chat_template
 
         if use_grad_checkpoint_llm:
@@ -135,8 +144,12 @@ class MedLVLM(MedLVLMBase):
 
         ckpt_path = cfg.get("ckpt", "")  # load weights of MiniGPT-4
         if ckpt_path:
-            print("Load Minigpt-4-LLM Checkpoint: {}".format(ckpt_path))
+            print("Load Model Checkpoint: {}".format(ckpt_path))
             ckpt = torch.load(ckpt_path, map_location="cpu")
             msg = model.load_state_dict(ckpt['model'], strict=False)
+
+            if not (vision_model == "eva_clip_g" and "llama" in language_model):
+                model.language_proj[-1].weight.data = ckpt['model']['language_proj'].weight.data
+                model.language_proj[-1].bias.data = ckpt['model']['language_proj'].bias.data
 
         return model
