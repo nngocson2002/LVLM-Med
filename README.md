@@ -23,6 +23,7 @@ For `checkpoint_stage3.pth`, you can load from the pretrained model below:
 |[Download](https://drive.google.com/file/d/1HkoUUrjzFGn33cSiUkI-KcT-zysCynAz/view?usp=sharing) |
 
 ## Installation
+- Python == 3.10.13
 ```bash
 git clone https://github.com/ngocson1042002/LVLM-Med.git
 cd LVLM-Med
