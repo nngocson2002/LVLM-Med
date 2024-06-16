@@ -22,7 +22,6 @@ class MistralForCausalLM(MistralForCausalLMOrig):
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
-        cache_position: Optional[torch.LongTensor] = None,
         reduction: Optional[str] = "mean"
     ) -> Union[Tuple, CausalLMOutputWithPast]:
         r"""
@@ -67,8 +66,7 @@ class MistralForCausalLM(MistralForCausalLMOrig):
             use_cache=use_cache,
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
-            return_dict=return_dict,
-            cache_position=cache_position
+            return_dict=return_dict
         )
 
         hidden_states = outputs[0]
