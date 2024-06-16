@@ -35,10 +35,10 @@ run:
   warmup_lr: 1e-6
 
   weight_decay: 0.05
-  max_epoch: 1
+  max_epoch: 3
   num_workers: 2
   warmup_steps: 1000
-  iters_per_epoch: 1000
+  iters_per_epoch: 3750
 
   seed: 42
   output_dir: "/path/to/save_checkpoint"
