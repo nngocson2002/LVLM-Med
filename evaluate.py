@@ -78,5 +78,5 @@ def evaluate(args):
                                     do_sample=do_sample)
             results.extend([{"image_id": image_id, "ground_truth": gt, "predict": predict} for image_id, gt, predict in zip(image_ids, ground_truth, predicts)])
         
-    with open(os.path.join(cfg.run_cfg.eval_save_path, "outputs_test.json"),"w") as jsonfile:
+    with open(os.path.join(cfg.run_cfg.save_path, "outputs_test.json"),"w") as jsonfile:
         json.dump(results, jsonfile, ensure_ascii=False)
