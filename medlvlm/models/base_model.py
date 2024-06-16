@@ -174,8 +174,8 @@ class BaseModel(nn.Module):
         tokenizer = AutoTokenizer.from_pretrained(language_model_path, use_fast=False)
         tokenizer.pad_token = "$$"
 
+        model_args = {}
         if low_resource:
-            model_args = {}
             from transformers import BitsAndBytesConfig
             model_args.update(dict(
                 pretrained_model_name_or_path=language_model_path,
@@ -183,7 +183,7 @@ class BaseModel(nn.Module):
                 quantization_config=BitsAndBytesConfig(
                     load_in_4bit= bits == 4,
                     load_in_8bit= bits == 8,
-                    llm_int8_has_fp16_weight=True,
+                    llm_int8_has_fp16_weight=False,
                     bnb_4bit_compute_dtype=torch.float16,
                     bnb_4bit_use_double_quant=True,
                     bnb_4bit_quant_type="nf4"
