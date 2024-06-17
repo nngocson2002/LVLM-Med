@@ -31,7 +31,7 @@ pip install -r requirements.txt
 ```
 
 ## Training
-### BiomedCLIP - Lamma2
+### BiomedCLIP - Llama2
 1. **Set Paths for Training**
     - Set the training annotations path to `root/annotations/test/grounded_diseases_train.json` [here](medlvlm/configs/datasets/vindrcxr/default.yaml#L6) at Line 6.
 
