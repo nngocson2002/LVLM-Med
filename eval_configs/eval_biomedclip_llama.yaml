@@ -26,7 +26,7 @@ evaluation_datasets:
   vindrcxr_val:
     eval_file_path: "path/to/grounded_diseases_test.json"
     img_path: "path/to/images/test"
-    prompt_test: "[radiology] please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes. Let's think step by step."
+    prompt_test: "[grounding] please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes. Let's think step by step."
     batch_size: 4
     max_new_tokens: 512
     temperature: 0.6
