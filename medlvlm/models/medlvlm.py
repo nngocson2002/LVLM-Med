@@ -149,7 +149,11 @@ class MedLVLM(MedLVLMBase):
             ckpt = torch.load(ckpt_path, map_location="cpu")
             msg = model.load_state_dict(ckpt['model'], strict=False)
 
-            if os.path.basename(ckpt_path) == "checkpoint_stage3.pth" and vision_model == "eva_clip_g" and "llama" in language_model:
+            is_eva_clip_g_llama = False
+            if vision_model == "eva_clip_g" and "llama" in language_model:
+                is_eva_clip_g_llama = True
+
+            if os.path.basename(ckpt_path) == "checkpoint_stage3.pth" and not is_eva_clip_g_llama:
                 model.language_proj[-1].weight.data = ckpt['model']['llama_proj.weight']
                 model.language_proj[-1].bias.data = ckpt['model']['llama_proj.bias']
 

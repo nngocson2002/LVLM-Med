@@ -1,4 +1,4 @@
-# Large Vision-Language Model for Medical Applications
+# Medical Vision-Language Model
 
 ## Dataset structure
 ```
