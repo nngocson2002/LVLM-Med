@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple, Union
 import torch
 import torch.nn.functional as F
 from torch.nn import CrossEntropyLoss
+from torch.nn import MSELoss
 
 from transformers.utils import add_start_docstrings_to_model_forward, replace_return_docstrings
 from transformers.modeling_outputs import CausalLMOutputWithPast
@@ -29,6 +30,8 @@ class LlamaForCausalLM(LlamaForCausalLMOrig):
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
         reduction: Optional[str] = "mean",
+        onehot_labels: torch.LongTensor = None,
+        onehot_logits: Optional[torch.FloatTensor] = None,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
         r"""
         Args:
@@ -97,6 +100,10 @@ class LlamaForCausalLM(LlamaForCausalLMOrig):
             # Enable model parallelism
             shift_labels = shift_labels.to(shift_logits.device)
             loss = loss_fct(shift_logits, shift_labels)
+
+            loss_mse = MSELoss(reduction=reduction)
+            loss = loss + 0.1 * loss_mse(onehot_logits, onehot_labels)
+
             if reduction == "none":
                 loss = loss.view(logits.size(0), -1).mean(1)
 

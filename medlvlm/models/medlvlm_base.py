@@ -218,7 +218,7 @@ class MedLVLMBase(BaseModel):
     def preparing_embedding(self, samples):
         ### prepare input tokens
         if 'image' in samples:
-            img_embeds, img_atts = self.encode_img(samples["image"])
+            img_embeds, img_atts, onehot_logits = self.encode_img(samples["image"])
         else:
             img_embeds = img_atts = None
 
@@ -275,11 +275,11 @@ class MedLVLMBase(BaseModel):
 
         regress_embeds = self.embed_tokens(regress_token_ids)
 
-        return cond_embeds, cond_atts, regress_embeds, regress_atts, part_targets
+        return cond_embeds, cond_atts, regress_embeds, regress_atts, part_targets, onehot_logits
 
     def forward(self, samples, reduction='mean'):
         # prepare the embedding to condition and the embedding to regress
-        cond_embeds, cond_atts, regress_embeds, regress_atts, part_targets = \
+        cond_embeds, cond_atts, regress_embeds, regress_atts, part_targets, onehot_logits = \
             self.preparing_embedding(samples)
 
         # concat the embedding to condition and the embedding to regress
@@ -308,7 +308,9 @@ class MedLVLMBase(BaseModel):
                 attention_mask=attention_mask,
                 return_dict=True,
                 labels=targets,
-                reduction=reduction
+                reduction=reduction,
+                onehot_labels=samples["onehot_label"],
+                onehot_logits = onehot_logits
             )
         loss = outputs.loss
 
@@ -343,7 +345,7 @@ class MedLVLMBase(BaseModel):
         stopping_criteria = StoppingCriteriaList([StoppingCriteriaSub(
             stops=[torch.tensor([i]).to(self.device) for i in stop_words_ids])])
 
-        img_embeds, atts_img = self.encode_img(images.to(self.device))
+        img_embeds, atts_img, _ = self.encode_img(images.to(self.device))
         image_lists = [[image_emb[None]] for image_emb in img_embeds]
 
         batch_embs = [self.get_context_emb(text, img_list) for text, img_list in zip(texts, image_lists)]

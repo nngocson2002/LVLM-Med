@@ -1,9 +1,11 @@
 import os
 import json
 import random
+import numpy as np
 
 from PIL import Image
 from torch.utils.data import Dataset
+import torch
 
 class VinDrCXRDataset(Dataset):
     def __init__(self, vis_processor, text_processor, vis_root, ann_path, prompt_test=None):
@@ -31,6 +33,10 @@ class VinDrCXRDataset(Dataset):
         with open(ann_path, 'r') as f:
             self.ann = json.load(f)
 
+        onehot_path = "onehot_labels.npy"
+        with open(onehot_path, 'r') as f:
+            self.onhot_labels = np.load(onehot_path)
+
     def __len__(self):
         return len(self.ann)
 
@@ -47,9 +53,12 @@ class VinDrCXRDataset(Dataset):
         instruction = random.choice(self.instruction_pool)
         instruction = "<Img><ImageHere></Img> {} ".format(instruction)
 
+        onehot_label = torch.from_numpy(self.onehot_labels[index].astype('float16'))
+
         return {
             "image": image,
             "instruction_input": instruction,
             "answer": answer,
             "image_id": info['image_id'],
+            "onehot_label": onehot_label
         }

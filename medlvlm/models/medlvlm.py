@@ -67,7 +67,10 @@ class MedLVLM(MedLVLMBase):
         )
 
         img_f_dim = self.visual_encoder.num_features * self.num_concat
-        if vision_model == "eva_clip_g" and "llama" in language_model: 
+
+        self.lin = nn.Linear(img_f_dim, 29)
+
+        if vision_model == "eva_clip_g" and "llama" in language_model:
             self.language_proj = nn.Linear(
                 img_f_dim, self.language_model.config.hidden_size
             )
@@ -95,9 +98,10 @@ class MedLVLM(MedLVLMBase):
             bs, pn, hs = image_embeds.shape
             image_embeds = image_embeds.view(bs, int(pn / self.num_concat), int(hs * self.num_concat))
 
+            onehot_logits = self.lin(image_embeds[:,0,:])
             inputs_language = self.language_proj(image_embeds)
             atts_language = torch.ones(inputs_language.size()[:-1], dtype=torch.long).to(image.device)
-        return inputs_language, atts_language
+        return inputs_language, atts_language, onehot_logits
 
     @classmethod
     def from_config(cls, cfg):
