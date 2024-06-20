@@ -156,17 +156,18 @@ class MedLVLM(MedLVLMBase):
             msg = model.load_state_dict(ckpt['model'], strict=False)
 
             if os.path.basename(ckpt_path) == "checkpoint_stage3.pth" and "llama" in language_model:
-                for name, param in model.named_parameters():
-                    name = name.replace("language_model", "llama_model")
-                    name = name.replace("default.", "")
-                    if ckpt['model'].get(name, None) is not None:
-                        param.data.copy_(ckpt['model'][name])
-                        
-                if vision_model == "eva_clip_g":
-                    model.language_proj.weight.data = ckpt['model']['llama_proj.weight']
-                    model.language_proj.bias.data = ckpt['model']['llama_proj.bias']
-                else:
-                    model.language_proj[-1].weight.data = ckpt['model']['llama_proj.weight']
-                    model.language_proj[-1].bias.data = ckpt['model']['llama_proj.bias']
+                with torch.no_grad():
+                    for name, param in model.named_parameters():
+                        name = name.replace("language_model", "llama_model")
+                        name = name.replace("default.", "")
+                        if ckpt['model'].get(name, None) is not None:
+                            param.copy_(ckpt['model'][name])
+                            
+                    if vision_model == "eva_clip_g":
+                        model.language_proj.weight.copy_(ckpt['model']['llama_proj.weight'])
+                        model.language_proj.bias.copy_(ckpt['model']['llama_proj.bias'])
+                    else:
+                        model.language_proj[-1].weight.copy_(ckpt['model']['llama_proj.weight'])
+                        model.language_proj[-1].bias.copy_(ckpt['model']['llama_proj.bias'])
 
         return model
