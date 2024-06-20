@@ -150,8 +150,15 @@ class MedLVLM(MedLVLMBase):
             msg = model.load_state_dict(ckpt['model'], strict=False)
 
             is_eva_clip_g_llama = False
-            if vision_model == "eva_clip_g" and "llama" in language_model:
-                is_eva_clip_g_llama = True
+            if "llama" in language_model:
+                for name, param in model.named_parameters():
+                    name = name.replace("language_model", "llama_model")
+                    name = name.replace("default.", "")
+                    if ckpt['model'].get(name, None) is not None:
+                        param.data.copy_(ckpt['model'][name])
+                        
+                if vision_model == "eva_clip_g":
+                    is_eva_clip_g_llama = True
 
             if os.path.basename(ckpt_path) == "checkpoint_stage3.pth" and not is_eva_clip_g_llama:
                 model.language_proj[-1].weight.data = ckpt['model']['llama_proj.weight']
