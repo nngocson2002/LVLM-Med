@@ -100,7 +100,7 @@ class MedLVLM(MedLVLMBase):
             image_embeds = image_embeds.view(bs, int(pn / self.num_concat), int(hs * self.num_concat))
 
             image_embeds = self.lin1(image_embeds)
-            onehot_logits = self.lin2(image_embeds)
+            onehot_logits = self.lin2(image_embeds)[:, 0, :]
             inputs_language = self.language_proj(image_embeds)
             atts_language = torch.ones(inputs_language.size()[:-1], dtype=torch.long).to(image.device)
         return inputs_language, atts_language, onehot_logits
