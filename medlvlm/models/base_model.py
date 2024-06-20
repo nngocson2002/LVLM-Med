@@ -211,6 +211,7 @@ class BaseModel(nn.Module):
                 bias="none",
                 task_type="CAUSAL_LM",
                 target_modules=lora_target_modules,
+                use_dora=True,
                 **lora_kargs
             )
             model = get_peft_model(model, loraconfig)
