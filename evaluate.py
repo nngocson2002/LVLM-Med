@@ -3,7 +3,6 @@ import json
 from medlvlm.datasets.datasets.vindrcxr_dataset import VinDrCXRDataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-import torch
 import os
 from medlvlm.common.eval_utils import prepare_texts
 from medlvlm.common.registry import registry
@@ -18,6 +17,25 @@ CONV_VISION = Conversation(
     sep_style=SeparatorStyle.SINGLE,
     sep="",
 )
+
+def list_of_str(arg):
+    return list(map(str, arg.split(',')))
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Training")
+
+    parser.add_argument("--cfg-path", required=True, help="path to train configuration file.")
+    parser.add_argument("--eval-dataset", type=list_of_str, default='val_vindrcxr', help="dataset to evaluate")
+    parser.add_argument(
+        "--options",
+        nargs="+",
+        help="override some settings in the used config, the key-value pair "
+        "in xxx=yyy format will be merged into config file (deprecate), "
+        "change to --cfg-options instead.",
+    )
+    args = parser.parse_args()
+
+    return args
 
 def init_model(cfg):
     print('Initialization Model')
@@ -71,7 +89,7 @@ def evaluate(args):
             image_ids = batch["image_id"]
             texts = prepare_texts(instruction_input, conv_temp)
             predicts = model.generate(images=images,
-                                    texts=instruction_input,
+                                    texts=texts,
                                     max_new_tokens=max_new_tokens,
                                     temperature=temperature,
                                     top_p=top_p,
@@ -80,3 +98,9 @@ def evaluate(args):
         
     with open(os.path.join(cfg.run_cfg.save_path, "outputs_test.json"),"w") as jsonfile:
         json.dump(results, jsonfile, ensure_ascii=False)
+
+if __name__ == "__main__":
+    args = parse_args()
+    print("Evaluating....................")
+    evaluate(args)
+    print("Done!")
