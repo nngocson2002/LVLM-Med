@@ -3,9 +3,7 @@ import json
 from medlvlm.datasets.datasets.vindrcxr_dataset import VinDrCXRDataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-import torch
 import os
-from medlvlm.common.eval_utils import prepare_texts
 from medlvlm.common.registry import registry
 from medlvlm.common.config import Config
 from medlvlm.conversation.conversation import Conversation, SeparatorStyle
@@ -18,6 +16,33 @@ CONV_VISION = Conversation(
     sep_style=SeparatorStyle.SINGLE,
     sep="",
 )
+
+def list_of_str(arg):
+    return list(map(str, arg.split(',')))
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Training")
+
+    parser.add_argument("--cfg-path", required=True, help="path to evaluate configuration file.")
+    parser.add_argument("--eval-dataset", type=list_of_str, default='val_vindrcxr', help="dataset to evaluate")
+    parser.add_argument(
+        "--options",
+        nargs="+",
+        help="override some settings in the used config, the key-value pair "
+        "in xxx=yyy format will be merged into config file (deprecate), "
+        "change to --cfg-options instead.",
+    )
+    args = parser.parse_args()
+
+    return args
+
+def prepare_texts(texts, conv_temp):
+    convs = [conv_temp.copy() for _ in range(len(texts))]
+    [conv.append_message(
+        conv.roles[0], '{}'.format(text)) for conv, text in zip(convs, texts)]
+    [conv.append_message(conv.roles[1], None) for conv in convs]
+    texts = [conv.get_prompt() for conv in convs]
+    return texts
 
 def init_model(cfg):
     print('Initialization Model')
@@ -71,12 +96,18 @@ def evaluate(args):
             image_ids = batch["image_id"]
             texts = prepare_texts(instruction_input, conv_temp)
             predicts = model.generate(images=images,
-                                    texts=instruction_input,
-                                    max_new_tokens=max_new_tokens,
-                                    temperature=temperature,
-                                    top_p=top_p,
-                                    do_sample=do_sample)
+                                      texts=texts,
+                                      max_new_tokens=max_new_tokens,
+                                      temperature=temperature,
+                                      top_p=top_p,
+                                      do_sample=do_sample)
             results.extend([{"image_id": image_id, "ground_truth": gt, "predict": predict} for image_id, gt, predict in zip(image_ids, ground_truth, predicts)])
         
     with open(os.path.join(cfg.run_cfg.save_path, "outputs_test.json"),"w") as jsonfile:
         json.dump(results, jsonfile, ensure_ascii=False)
+
+if __name__ == "__main__":
+    args = parse_args()
+    print("Evaluating....................")
+    evaluate(args)
+    print("Done!")
