@@ -23,7 +23,7 @@ def list_of_str(arg):
 def parse_args():
     parser = argparse.ArgumentParser(description="Training")
 
-    parser.add_argument("--cfg-path", required=True, help="path to train configuration file.")
+    parser.add_argument("--cfg-path", required=True, help="path to evaluate configuration file.")
     parser.add_argument("--eval-dataset", type=list_of_str, default='val_vindrcxr', help="dataset to evaluate")
     parser.add_argument(
         "--options",
