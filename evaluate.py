@@ -4,7 +4,6 @@ from medlvlm.datasets.datasets.vindrcxr_dataset import VinDrCXRDataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import os
-from medlvlm.common.eval_utils import prepare_texts
 from medlvlm.common.registry import registry
 from medlvlm.common.config import Config
 from medlvlm.conversation.conversation import Conversation, SeparatorStyle
@@ -36,6 +35,14 @@ def parse_args():
     args = parser.parse_args()
 
     return args
+
+def prepare_texts(texts, conv_temp):
+    convs = [conv_temp.copy() for _ in range(len(texts))]
+    [conv.append_message(
+        conv.roles[0], '{}'.format(text)) for conv, text in zip(convs, texts)]
+    [conv.append_message(conv.roles[1], None) for conv in convs]
+    texts = [conv.get_prompt() for conv in convs]
+    return texts
 
 def init_model(cfg):
     print('Initialization Model')
@@ -89,11 +96,11 @@ def evaluate(args):
             image_ids = batch["image_id"]
             texts = prepare_texts(instruction_input, conv_temp)
             predicts = model.generate(images=images,
-                                    texts=texts,
-                                    max_new_tokens=max_new_tokens,
-                                    temperature=temperature,
-                                    top_p=top_p,
-                                    do_sample=do_sample)
+                                      texts=texts,
+                                      max_new_tokens=max_new_tokens,
+                                      temperature=temperature,
+                                      top_p=top_p,
+                                      do_sample=do_sample)
             results.extend([{"image_id": image_id, "ground_truth": gt, "predict": predict} for image_id, gt, predict in zip(image_ids, ground_truth, predicts)])
         
     with open(os.path.join(cfg.run_cfg.save_path, "outputs_test.json"),"w") as jsonfile:
