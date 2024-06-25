@@ -30,6 +30,9 @@ from medlvlm.common.utils import now
 # imports modules for registration
 from medlvlm.models import *
 from evaluate import *
+from medlvlm.processors import *
+from medlvlm.runners import *
+from medlvlm.tasks import *
 
 def list_of_str(arg):
     return list(map(str, arg.split(',')))
