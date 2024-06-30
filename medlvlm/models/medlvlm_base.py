@@ -8,6 +8,8 @@ import torch.nn as nn
 from medlvlm.common.registry import registry
 from medlvlm.models.base_model import BaseModel
 from transformers import StoppingCriteria, StoppingCriteriaList
+from torch.nn import CrossEntropyLoss
+from compute_metrics import extract_labels
 
 from medlvlm.conversation.conversation import StoppingCriteriaSub
 
@@ -57,6 +59,11 @@ class MedLVLMBase(BaseModel):
             drop_path_rate=drop_path_rate, 
             use_checkpoint=use_grad_checkpoint, 
             precision=vit_precision
+        )
+
+        self.classifier = nn.Sequential(
+            nn.GELU(),
+            nn.Linear(self.language_model.config.hidden_size, 29)
         )
 
         self.max_txt_len = max_txt_len
@@ -311,6 +318,15 @@ class MedLVLMBase(BaseModel):
                 reduction=reduction
             )
         loss = outputs.loss
+
+        if 'image' in samples:
+            img_embeds, _ = self.encode_img(samples["image"])
+            z = img_embeds.mean(dim=1)
+            logits = self.classifier(z)
+            labels = torch.tensor([extract_labels(t) for t in samples["answer"]], dtype=logits.dtype)
+
+            classifier_loss = CrossEntropyLoss()
+            loss += classifier_loss(logits, labels)
 
         return {"loss": loss}
 
