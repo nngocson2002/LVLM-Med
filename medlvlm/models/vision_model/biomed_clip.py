@@ -8,7 +8,7 @@ class BiomedCLIP(nn.Module):
         self.num_features = 768
 
     def forward(self, x):
-        return self.model.forward_features(x)
+        return self.model.forward_features(x)[:, 1:, :]
     
 def create_biomed_clip(**kwargs):
     precision = kwargs.get("precision", "fp16")

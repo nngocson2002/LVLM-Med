@@ -20,5 +20,5 @@ def build_vision_encoder(vision_model, **kwargs):
     if vision_model == "biomed_pubmed_clip":
         img_size = kwargs["img_size"]
         assert img_size == 224, "The resolution of the image must be (224, 224)"
-        num_concat = 6
+        num_concat = 5
         return create_biomed_pubmed_clip(**kwargs), num_concat

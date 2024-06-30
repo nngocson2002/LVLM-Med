@@ -349,7 +349,7 @@ class VisionTransformer(nn.Module):
     def forward(self, x):
         x = self.forward_features(x)
 #         x = self.head(x)
-        return x
+        return x[:, 1:, :]
 
     def get_intermediate_layers(self, x):
         x = self.patch_embed(x)

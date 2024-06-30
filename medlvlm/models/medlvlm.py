@@ -91,7 +91,7 @@ class MedLVLM(MedLVLMBase):
 
         with self.maybe_autocast():
             image_embeds = self.ln_vision(self.visual_encoder(image)).to(device)
-            image_embeds = image_embeds[:, 1:, :]
+            # image_embeds = image_embeds[:, 1:, :]
             bs, pn, hs = image_embeds.shape
             image_embeds = image_embeds.view(bs, int(pn / self.num_concat), int(hs * self.num_concat))
 

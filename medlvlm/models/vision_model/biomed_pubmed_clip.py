@@ -10,8 +10,8 @@ class BiomedPubmedCLIP(nn.Module):
         self.pubmed_clip = CLIPModel.from_pretrained("flaviagiammarino/pubmed-clip-vit-base-patch32").vision_model
         self.num_features = 768
     def forward(self, x):
-        x1 = self.biomed_clip.forward_features(x)
-        x2 = self.pubmed_clip(x).last_hidden_state
+        x1 = self.biomed_clip.forward_features(x)[:, 1:, :]
+        x2 = self.pubmed_clip(x).last_hidden_state[:, 1:, :]
         x = torch.cat([x1, x2], dim=1)
         return x
     

@@ -8,7 +8,7 @@ class PubmedCLIPViT(nn.Module):
         self.num_features = 768
 
     def forward(self, x):
-        return self.model(x).last_hidden_state
+        return self.model(x).last_hidden_state[:, 1:, :]
     
 def create_pubmed_clip_vit(**kwargs):
     precision = kwargs.get("precision", "fp16")
