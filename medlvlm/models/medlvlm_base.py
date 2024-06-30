@@ -323,7 +323,7 @@ class MedLVLMBase(BaseModel):
             img_embeds, _ = self.encode_img(samples["image"])
             z = img_embeds.mean(dim=1)
             logits = self.classifier(z)
-            labels = torch.tensor([extract_labels(t) for t in samples["answer"]], dtype=logits.dtype)
+            labels = torch.tensor([extract_labels(t) for t in samples["answer"]], dtype=logits.dtype).to(logits.device)
 
             classifier_loss = CrossEntropyLoss()
             loss += classifier_loss(logits, labels)
