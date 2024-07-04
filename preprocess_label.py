@@ -42,7 +42,7 @@ def groupby_bboxes_overlap(df):
                 next_group_id += 1
 
         df.loc[group.index, "overlap_group"] = group_assignments
-        return df
+    return df
 
 def get_image_size(path):
     image = cv2.imread(path)
@@ -117,7 +117,7 @@ def main():
         json.dump(local_labels, f, ensure_ascii=False, indent=4)
 
     with open('global_labels_train_v3.json', 'w', encoding='utf-8') as f:
-        json.dump(local_labels, f, ensure_ascii=False, indent=4)
+        json.dump(global_labels, f, ensure_ascii=False, indent=4)
 
     with open('grounded_diseases_train_v3.json', 'w', encoding='utf-8') as f:
         json.dump(combine_labels, f, ensure_ascii=False, indent=4)
