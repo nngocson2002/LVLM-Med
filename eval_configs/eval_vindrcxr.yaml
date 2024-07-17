@@ -2,10 +2,10 @@ model:
   arch: medlvlm
   model_type: pretrain
   max_txt_len: 1024
-  image_size: 448
+  image_size: 224
   end_sym: </s>
   language_model: "meta-llama/Llama-2-7b-chat-hf"
-  vision_model: "biomed_clip"
+  vision_model: "<visual encoder>"
   ckpt: "path/to/checkpoint"
   use_grad_checkpoint: true
   chat_template: true
@@ -18,7 +18,7 @@ datasets:
     vis_processor:
       train:
         name: "blip2_image_eval"
-        image_size: 448
+        image_size: 224
     text_processor:
       train:
         name: "blip_caption"
@@ -26,7 +26,7 @@ evaluation_datasets:
   vindrcxr_val:
     eval_file_path: "path/to/grounded_diseases_test.json"
     img_path: "path/to/images/test"
-    prompt_test: "[radiology] please describe this image in details with radiological features. Use two sentences unless there are no findings. The first sentence should list the global diseases present in the image, and the second should list local diseases with localized bounding boxes. Let's think step by step."
+    prompt_test: "<your prompt>"
     batch_size: 4
     max_new_tokens: 512
     temperature: 0.6
