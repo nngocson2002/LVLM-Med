@@ -74,7 +74,7 @@ def preprocess_local_labels(path, process_overlap=True):
 
     df["labels"] = df.apply(lambda x: x["class_name"] if x["class_name"] == "No finding" else f"<p>{x['class_name']}</p> {{<{int(x['x_min'])}><{int(x['y_min'])}><{int(x['x_max'])}><{int(x['y_max'])}>}}", axis=1)
     df_labels = df.groupby('image_id')['labels'].apply(lambda x: ','.join(set(x))).reset_index()
-    local_labels = [{"image_id": image_id, "local_labels": f"Local diseases of this chest radiograph are {label}."} for image_id, label in zip(df_labels['image_id'], df_labels['labels']) if label != "No finding"]
+    local_labels = [{"image_id": image_id, "local_labels": f"Local diseases of this chest radiograph are {label}."} for image_id, label in zip(df_labels['image_id'], df_labels['labels'])]
     return local_labels
 
 def preprocess_global_labels(path):
