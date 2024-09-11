@@ -25,6 +25,7 @@ For `checkpoint_stage3.pth`, you can load from the pretrained model below:
 ## Installation
 - Python == 3.10.13
 ```bash
+conda create -n litegpt python=3.10.13
 git clone https://github.com/nngocson2002/LVLM-Med.git
 cd LVLM-Med
 pip install -r requirements.txt
